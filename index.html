@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Карта метро Макото</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="badge">
+      <span class="badge-left" id="badge-line">ЗВ</span>
+      <span class="badge-right" id="badge-code">1111</span>
+    </div>
+  </div>
+  <div id="station-info"></div>
+  <button class="toggle-btn" onclick="toggleSidebar()">Закрыть</button>
+</div>
+
+<div class="map">
+  <div class="line green up"></div>
+  <div class="line red down"></div>
+  <div class="line yellow right"></div>
+  <div class="line blue left"></div>
+
+  <div class="dot-green" onclick='openSidebar({
+    name: "Центральная лавка",
+    code: "500",
+    line: "ЗВ",
+    description: "ничего.",
+    tags: ["Flower0k"],
+    screenshots: ["https://i.imgur.com/iRFGsja_d.webp?maxwidth=520&shape=thumb&fidelity=high", "scr"]
+  })'></div>
+
+  <div class="dot-shop100" onclick='openSidebar({
+    name: "SHOP 100",
+    code: "100",
+    line: "ЗВ",
+    description: "Прикольный магазинчик в стиле Дворца испытаний, в нём можно пофармить опыт на ферме золота перед порталом. И Хорошо провести время пройдя",
+    tags: ["NameUserMaybe", "ферма" ,"Магазин"],
+    screenshots: ["https://i.imgur.com/mHselc3.png", "https://i.imgur.com/DdjpZGn.png"]
+  })'></div>
+
+  <div class="center" onclick='openSidebar({
+    name: "Спавн",
+    code: "0000",
+    line: "ЗВ",
+    description: "Спавн. Начало всех путей.",
+    tags: ["Makoto","SOSAT43!"],
+    screenshots: ["https://i.imgur.com/M18z6Nz.png", "https://i.imgur.com/8A6pWPE.png"]
+  })'></div>
+</div>
+
+<div style="position: fixed; top: 20px; right: 20px; z-index: 1100;">
+  <button id="filter-toggle" class="filter-toggle">Фильтр</button>
+  <div id="filter-panel" class="filter-panel">
+    <label><input type="checkbox" value="город">Городa</label><br>
+    <label><input type="checkbox" value="рынок">Магазины</label><br>
+  </div>
+</div>
+
+<script>
+  const lineColors = {
+    'КВ': '#ff4444',
+    'ЗВ': '#00cc44',
+    'ЖВ': '#ffd700',
+    'СВ': '#3399ff'
+  };
+
+  function openSidebar(data) {
+    const sidebar = document.getElementById('sidebar');
+    const info = document.getElementById('station-info');
+    const badgeCode = document.getElementById('badge-code');
+    const badgeLine = document.getElementById('badge-line');
+
+    sidebar.classList.add('open');
+    badgeCode.textContent = data.code || '0000';
+    badgeLine.textContent = data.line || '??';
+    badgeLine.style.backgroundColor = lineColors[data.line] || '#777';
+
+    const tagHTML = data.tags.map((tag, i) =>
+      `<div class="tag ${i === 0 ? 'red' : 'purple'}">${tag}</div>`
+    ).join('');
+
+    const screenshotsHTML = data.screenshots.map(src =>
+      `<img src="${src}" alt="Скриншот">`
+    ).join('');
+
+    info.innerHTML = `
+      <div class="station-title">${data.name}</div>
+      <div class="station-tags">${tagHTML}</div>
+      <div class="station-description">${data.description}</div>
+      <div class="station-divider"></div>
+      <div class="station-screenshots">${screenshotsHTML}</div>
+      <div class="station-divider"></div>
+    `;
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  document.getElementById('filter-toggle').addEventListener('click', () => {
+    const panel = document.getElementById('filter-panel');
+    panel.classList.toggle('open');
+  });
+
+  function createMark(distanceMeters, direction = 'up') {
+    const map = document.querySelector('.map');
+    const mark = document.createElement('div');
+    mark.className = 'line-mark';
+    mark.setAttribute('data-label', `${distanceMeters} м`);
+
+    const offset = distanceMeters / 10;
+
+    if (direction === 'up') {
+      mark.style.top = `calc(50% - ${offset}%)`;
+      mark.style.left = `calc(50% + 4px)`;
+      mark.style.width = '10px';
+    } else if (direction === 'down') {
+      mark.style.top = `calc(50% + ${offset}%)`;
+      mark.style.left = `calc(50% + 4px)`;
+      mark.style.width = '10px';
+    } else if (direction === 'left') {
+      mark.style.top = `calc(50% - 1px)`;
+      mark.style.left = `calc(50% - ${offset}% - 12px)`;
+      mark.style.width = '10px';
+    } else if (direction === 'right') {
+      mark.style.top = `calc(50% - 1px)`;
+      mark.style.left = `calc(50% + ${offset}%)`;
+      mark.style.width = '10px';
+    }
+
+    map.appendChild(mark);
+  }
+
+  function generateAllMarks(maxDistance = 500, step = 50) {
+    const directions = ['up', 'down', 'left', 'right'];
+    for (let i = 0; i <= maxDistance; i += step) {
+      directions.forEach(dir => createMark(i, dir));
+    }
+  }
+
+  generateAllMarks(500, 50);
+</script>
+
+</body>
+</html>
